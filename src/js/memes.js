@@ -1,10 +1,59 @@
 import './general';
 
-class Memes {
-  constructor() {
-    console.log("Memes JS File");
+  // Meme class
+  class Memes {
+
+    // constructor
+    constructor() {
+      console.log("Memes JS File");
+
+      // instance variables for all UI elements
+      // these are from the book
+      this.$topTextInput = document.getElementById("topText");
+      this.$bottomTextInput = document.getElementById("bottomText");
+      this.$imageInput = document.getElementById("image");
+      this.$downloadButton = document.getElementById("downloadMeme");
+      this.$canvas = document.getElementbyID("imgCanvas");
+
+      // these are not in the book, additional instance variables
+      this.$defaultImage = document.querySelector('#defaultImage');
+      this.image = this.$defaultImage;
+      this.$context = this.canvas.getContext('2d');
+      this.deviceWidth = window.innerWidth;
+
+      // does not need to be bound
+      this.createCanvas();
+
+    }
+
+    // createCanvas
+    createCanvas() {
+      this.$canvas.width = Math.min(640, this.deviceWidth);
+      this.$canvas.height = Math.min(480, this.deviceWidth);
+    }
+
+    // createMeme
+    /* clears previous image
+       draws new image to the page
+       sets up text
+       draws the text
+
+    */
+    createMeme(){
+      // clear previous image
+      this.$context.clearRect(0, 0, this.$canvas.height, this.$canvas.width);
+
+      // draw the image
+      this.$canvas.height = this.image.height;
+      this.$canvas.width = this.image.width;
+
+      // set up text
+
+      // draw text
+      
+    }
   }
-}
+
 new Memes();
 
 /*  
