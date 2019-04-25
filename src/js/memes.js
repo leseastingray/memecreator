@@ -9,48 +9,102 @@ import './general';
 
       // instance variables for all UI elements
       // these are from the book
-      this.$topTextInput = document.getElementById("topText");
-      this.$bottomTextInput = document.getElementById("bottomText");
-      this.$imageInput = document.getElementById("image");
-      this.$downloadButton = document.getElementById("downloadMeme");
-      this.$canvas = document.getElementbyID("imgCanvas");
-
-      // these are not in the book, additional instance variables
+      this.$topTextInput = document.querySelector('#topText');
+      this.$bottomTextInput = document.querySelector('#bottomText');
+      this.$imageInput = document.querySelector('#image');
+      this.$downloadButton = document.querySelector('#downloadMeme');
       this.$defaultImage = document.querySelector('#defaultImage');
       this.image = this.$defaultImage;
-      this.$context = this.canvas.getContext('2d');
+  
+      this.$canvas = document.querySelector('#imgCanvas');
+      this.$context = this.$canvas.getContext('2d');
       this.deviceWidth = window.innerWidth;
+  
 
-      // does not need to be bound
+
+      // does not need to be bound 
       this.createCanvas();
+      this.createMeme();
+      this.addEventListeners();
 
     }
 
     // createCanvas
     createCanvas() {
-      this.$canvas.width = Math.min(640, this.deviceWidth);
-      this.$canvas.height = Math.min(480, this.deviceWidth);
+      const canvasHeight = Math.min(480, this.deviceWidth-30);
+      const canvasWidth = Math.min(640, this.deviceWidth-30);
+  
+      this.$canvas.height = canvasHeight;
+      this.$canvas.width = canvasWidth;
     }
 
-    // createMeme
-    /* clears previous image
-       draws new image to the page
-       sets up text
-       draws the text
-
-    */
-    createMeme(){
-      // clear previous image
+    createMeme()
+    {
+      // clear the image
       this.$context.clearRect(0, 0, this.$canvas.height, this.$canvas.width);
 
       // draw the image
       this.$canvas.height = this.image.height;
       this.$canvas.width = this.image.width;
+      //this.resizeCanvas(this.$canvas.height, this.$canvas.width);
+      this.$context.drawImage(this.image, 0, 0);
 
-      // set up text
+      // setup the text for drawing
+      const fontSize = ((this.$canvas.width+this.$canvas.height)/2)*4/100;
+      this.$context.font = `${fontSize}pt sans-serif`;
+      this.$context.textAlign = 'center';
+      this.$context.textBaseline = 'top';
+      this.$context.lineJoin = 'round';
+      this.$context.lineWidth  = fontSize/5;
+      this.$context.strokeStyle = 'black';
+      this.$context.fillStyle = 'white';
 
-      // draw text
-      
+      // get the default text from the UI
+      const topText = this.$topTextInput.value.toUpperCase();
+      const bottomText = this.$bottomTextInput.value.toUpperCase();
+      this.$context.strokeText(topText, this.$canvas.width/2, this.$canvas.height*(5/100));
+      this.$context.fillText(topText, this.$canvas.width/2, this.$canvas.height*(5/100));
+      this.$context.strokeText(bottomText, this.$canvas.width/2, this.$canvas.height*(90/100));
+      this.$context.fillText(bottomText, this.$canvas.width/2, this.$canvas.height*(90/100));
+    }
+
+    addEventListeners() 
+    {
+      // binding methods
+      this.createMeme = this.createMeme.bind(this);
+      this.downloadMeme = this.downloadMeme.bind(this);
+      this.loadImage = this.loadImage.bind(this);
+
+      let inputNodes = [this.$topTextInput, this.$bottomTextInput];
+      inputNodes.forEach(element => element.addEventListener('keyup', this.createMeme));
+      inputNodes.forEach(element => element.addEventListener('change', this.createMeme));
+      this.$downloadButton.addEventListener('click', this.downloadMeme);
+      this.$imageInput.addEventListener('change', this.loadImage);
+    }
+
+    loadImage() 
+    {
+      if (this.$imageInput.files && this.$imageInput.files[0]) 
+      {
+        // instantiate new FileReader object
+        let reader = new FileReader();
+
+        reader.onload = () => { 
+          this.image = new Image();
+          this.image.onload = () => { 
+            this.createMeme();
+          };
+          // source attribute of object = result of FileReader file read
+          this.image.src = reader.result;
+        };
+        reader.readAsDataURL(this.$imageInput.files[0]);
+      }
+    }
+
+    downloadMeme() 
+    {
+      const imageSource = this.$canvas.toDataURL('image/png');
+      this.$downloadButton.setAttribute('href', imageSource);
     }
   }
 
